@@ -4,10 +4,10 @@ Definition Var := nat.
 
 Section signature.
 
-Parameter T : Set.
-Parameter Const : Set.
-Parameter Cdom: Const -> list T.
-Parameter Ccod: Const -> T.
+Variable T : Set.
+Variable Const : Set.
+Variable Cdom: Const -> list T.
+Variable Ccod: Const -> T.
 
 Definition Context := list T.
 
@@ -98,3 +98,110 @@ with
     judgement_list gamma trest typetl ->
     judgement_list gamma (cons thead trest) (cons typeh typetl)
     .
+
+End signature.
+
+
+Section binnat.
+Inductive BinNat : Set :=
+| N : BinNat
+| B : BinNat.
+
+Inductive consts : Set :=
+| plus: consts
+| iiff : consts.
+
+Definition consts_dom (c: consts): list BinNat :=
+  match c with
+    | plus => N :: N :: nil
+    | iiff => B :: N :: N :: nil
+  end.
+
+Definition consts_cod (c: consts): BinNat :=
+  match c with
+    | plus => N
+    | iiff => N
+  end.
+
+Definition term_judge_binnat :=
+  term_judge BinNat consts consts_dom consts_cod.
+
+Lemma example_p123:
+(*
+   p. 123 has a type derivation.
+   Below is the translation.
+*)
+  term_judge_binnat (B :: N :: nil)
+  (Cex consts iiff
+  ((Vex consts 0) :: (Vex consts 1) ::
+    Cex consts plus ((Vex consts 1 :: Vex consts 1 :: nil)) :: nil))
+  N .
+apply function_symbol.
+apply judgement_cons.
+replace (B :: N :: nil)
+  with (app (B ::nil) (N :: nil)).
+apply weakening.
+apply identity.
+compute.
+reflexivity.
+
+apply judgement_cons.
+replace (B :: N :: nil) with
+  (app nil (app (B :: N :: nil) nil)).
+Check substitution2.
+replace (Vex consts 1) with
+  (substitution2 consts
+    0 (Vex consts (S O))
+    (S 0) (Vex consts O)
+    (Vex consts 0)).
+apply exchange.
+replace (nil ++ (N :: B :: nil) ++ nil) with
+  (app (cons N nil) (cons B nil)).
+apply weakening.
+apply identity.
+compute.
+reflexivity.
+
+compute.
+reflexivity.
+
+compute.
+reflexivity.
+
+apply judgement_cons.
+
+replace (B :: N :: nil) with
+  (app nil (app (cons B (cons N nil)) nil)).
+replace
+     (Cex consts plus (Vex consts 1 :: Vex consts 1 :: nil)) with
+     (substitution2 consts
+       O (Vex consts 1)
+       (S O) (Vex consts 0)
+       (Cex consts plus (Vex consts 0 :: Vex consts 0 :: nil))).
+       
+apply exchange.
+
+replace (nil ++ (N :: B :: nil) ++ nil) with
+  (app (N :: nil) (B :: nil)).
+apply weakening.
+apply function_symbol.
+
+apply judgement_cons.
+apply identity.
+apply judgement_cons.
+apply identity.
+
+apply judgement_nil.
+compute.
+reflexivity.
+
+compute.
+reflexivity.
+
+compute.
+reflexivity.
+
+apply judgement_nil.
+Qed.
+
+End binnat.
