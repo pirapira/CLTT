@@ -106,6 +106,65 @@ Definition substitution_rule:
     term_judge (app gamma (sigma :: nil)) M tau ->
     term_judge gamma N sigma ->
     term_judge gamma (substitution (length gamma) N M) tau.
+intros gamma M N tau sigma.
+intros Mjudge Njudge.
+inversion Mjudge.
+ destruct gamma.
+  compute.
+  rewrite H2 in *.
+  clear H2 sigma0.
+  compute in H0.
+  replace tau with sigma.
+  assumption.
+  clear - H0.
+  inversion H0.
+  reflexivity.
+
+  compute.
+  rewrite <- H1 in *.
+  clear H1 M.
+  rewrite H2 in *.
+  clear H2 sigma0.
+  clear Njudge N.
+  assert ((length (tau :: nil)) = (length ((t :: gamma) ++ sigma :: nil))).
+  rewrite H0.
+  reflexivity.
+  assert (length ((t :: gamma) ++ sigma :: nil) > 1).
+  clear.
+  induction gamma.
+  intuition.
+  replace (length ((t :: a :: gamma) ++ sigma :: nil)) with
+    ((length ((t :: gamma) ++ sigma :: nil)) + 1).
+  rewrite app_length.
+  rewrite app_length in IHgamma.
+  unfold length.
+  intuition.
+  
+  repeat rewrite app_length.
+  unfold length.
+  Require Import Omega.
+  omega.
+
+  rewrite <- H in H1.
+  compute in H1.
+  contradict H1.
+  intuition.
+
+  apply function_symbol.
+  rewrite <- H1 in *.
+  rewrite <- H2 in *.
+  clear H1 M H2 tau.
+  clear H0 gamma0.
+  generalize subterms H Mjudge.
+  clear subterms H Mjudge.
+  induction (Cdom c).
+    intros.
+    inversion H.
+    compute.
+    apply judgement_nil.
+
+    intros.
+
 Admitted.
 
 
