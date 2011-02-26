@@ -99,6 +99,16 @@ with
     judgement_list gamma (cons thead trest) (cons typeh typetl)
     .
 
+(* p.123 substutution rule *)
+
+Definition substitution_rule: 
+  forall (gamma: Context) (M N: RawTerm) (tau sigma: T),
+    term_judge (app gamma (sigma :: nil)) M tau ->
+    term_judge gamma N sigma ->
+    term_judge gamma (substitution (length gamma) N M) tau.
+Admitted.
+
+
 End signature.
 
 
@@ -205,3 +215,6 @@ apply judgement_nil.
 Qed.
 
 End binnat.
+
+
+
